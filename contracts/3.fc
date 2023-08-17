@@ -81,6 +81,12 @@ forall X -> (tuple, (X)) pop_back (tuple t) asm "UNCONS";
     }
   }
 
+  if (left.builder_bits() + middle_size > 1023) {
+    left_stack~push_back(left);
+    left = begin_cell();
+  }
+  left~store_uint(middle, middle_size);
+
   cell answer = left.end_cell();
   while (~ left_stack.is_empty()) {
     left = left_stack~pop_back();
