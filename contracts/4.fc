@@ -30,7 +30,7 @@ forall X -> (tuple, (X)) pop_back (tuple t) asm "UNCONS";
         character = (character - 65 + shift) % 26 + 65;
       } else {
         if ((character >= 97) & (character <= 122)) {
-          character = (character - 97 + shift) % 26 + 65;
+          character = (character - 97 + shift) % 26 + 97;
         }
       }
       answer~store_uint(character, 8);
