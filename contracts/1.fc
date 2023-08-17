@@ -9,7 +9,21 @@
 () recv_internal() {
 }
 
+global answer;
+
+() solve(int hash, cell tree) impure {
+  if (tree.cell_hash() == hash) {
+    answer = tree;
+  }
+  slice slc = tree.begin_parse();
+  repeat (slc.slice_refs()) {
+    solve(hash, slc~load_ref());
+  }
+}
+
 ;; testable
 (cell) find_branch_by_hash(int hash, cell tree) method_id {
-  return begin_cell().end_cell();
+  answer = begin_cell().end_cell();
+  solve(hash, tree);
+  return answer;
 }
