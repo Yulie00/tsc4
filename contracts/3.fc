@@ -29,11 +29,65 @@
 
 -}
 
+(int) count_bits(int x) inline asm "UBITSIZE";
+forall X -> (tuple, ()) push_back (tuple tail, X head) asm "CONS";
+forall X -> (tuple, (X)) pop_back (tuple t) asm "UNCONS";
+(int) is_empty(tuple t) inline asm "ISNULL"; 
+
+
 () recv_internal() {
 }
 
+
 ;; testable
 (cell) find_and_replace(int flag, int value, cell linked_list) method_id {
-  return begin_cell().end_cell();
+
+  int flag_size = flag.count_bits();
+  int value_size = value.count_bits();
+  int middle = 0;
+  int middle_size = 0;
+  slice right = linked_list.begin_parse();
+  tuple left_stack = null();
+  builder left = begin_cell();
+
+  while (~ right.slice_empty?()) {
+    if (right.slice_data_empty?()) {
+      right = right~load_ref().begin_parse();
+    } else {
+      int bit = right~load_uint(1);
+      middle = (middle << 1) | bit; 
+      if (middle_size == flag_size) {
+        int to_answer = middle >> flag_size;
+        middle -= to_answer << flag_size;
+        if (left.builder_bits() == 1023) {
+          left_stack~push_back(left);
+          left = begin_cell();
+        }
+        left~store_uint(to_answer, 1);
+      } else {
+        middle_size += 1;
+      }
+      if (middle_size == flag_size) {
+        if (middle == flag) {
+          middle = 0;
+          middle_size = 0;
+          if (left.builder_bits() + value_size > 1023) {
+            left_stack~push_back(left);
+            left = begin_cell();
+          }
+          left~store_uint(value, value_size);
+        }
+      }
+    }
+  }
+
+  cell answer = left.end_cell();
+  while (~ left_stack.is_empty()) {
+    left = left_stack~pop_back();
+    left.store_ref(answer);
+    answer = left.end_cell();
+  }
+
+  return answer;
 }
 
