@@ -25,7 +25,14 @@ forall X -> (tuple, (X)) pop_back (tuple t) asm "UNCONS";
       answer = begin_cell();
     } else {
       int character = slc~load_uint(8);
-      answer~store_uint((character + shift) % 128, 8);
+      if ((character >= 65) & (character <= 90)) {
+        character = (character - 65 + shift) % 26 + 65;
+      } else {
+        if ((character >= 97) & (character <= 122)) {
+          character = (character - 97 + shift) % 26 + 65;
+        }
+      }
+      answer~store_uint(character, 8);
     }
   }
 
