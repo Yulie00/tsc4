@@ -12,8 +12,30 @@
 () recv_internal() {
 }
 
+(int) length(tuple t) asm "TLEN";
+
 ;; testable
 (tuple) matrix_multiplier(tuple matrixA, tuple matrixB) method_id {
-  return null();
+  tuple answer = empty_tuple();
+  int n = matrixA.length();
+  int m = matrixB.length();
+  int p = matrixB.at(0).length();
+  int row = 0;
+  repeat (n) {
+    int col = 0;
+    tuple row_tuple = empty_tuple();
+    repeat (p) {
+      int i = 0;
+      int value = 0;
+      repeat (m) {
+        value += matrixA.at(row).at(i) * matrixB.at(i).at(col);
+      }
+      row_tuple.tpush(value);
+      col += 1;
+    }
+    answer.tpush(row_tuple);
+    row += 1;
+  }
+  return answer;
 }
 
