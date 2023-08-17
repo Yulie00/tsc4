@@ -6,16 +6,45 @@
   character should go to the beginning. Return new text encoded in cell.
 -}
 
+(int) count_bits(int x) inline asm "UBITSIZE";
+forall X -> (tuple, ()) push_back (tuple tail, X head) asm "CONS";
+forall X -> (tuple, (X)) pop_back (tuple t) asm "UNCONS";
+(int) is_empty(tuple t) inline asm "ISNULL"; 
+
 () recv_internal() {
+}
+
+(cell) encrypt(int shift, cell text) inline {
+  tuple answer_stack = null();
+  builder answer = begin_cell().store_uint(0, 32);
+  slice slc = text.begin_parse().skip_bits(32);
+  while (~ slc.slice_empty?()) {
+    if (slc.slice_data_empty?()) {
+      slc = slc~load_ref().begin_parse();
+      answer_stack~push_back(answer);
+      answer = begin_cell();
+    } else {
+      int character = slc~load_uint(8);
+      answer~store_uint((character + shift) % 256, 8);
+    }
+  }
+
+  cell answer_cell = answer.end_cell();
+  while (~ answer_stack.is_empty()) {
+    answer = answer_stack~pop_back();
+    answer = answer.store_ref(answer_cell);
+    answer_cell = answer.end_cell();
+  }
+  return answer_cell;
 }
 
 ;; testable
 (cell) caesar_cipher_encrypt(int shift, cell text) method_id {
-  return begin_cell().end_cell();
+  return encrypt(shift, text);
 }
 
 ;; testable
 (cell) caesar_cipher_decrypt(int shift, cell text) method_id {
-  return begin_cell().end_cell();
+  return encrypt(- shift, text);
 }
 
