@@ -29,11 +29,12 @@
       int value = 0;
       repeat (m) {
         value += matrixA.at(row).at(i) * matrixB.at(i).at(col);
+        i += 1;
       }
-      row_tuple.tpush(value);
+      row_tuple~tpush(value);
       col += 1;
     }
-    answer.tpush(row_tuple);
+    answer~tpush(row_tuple);
     row += 1;
   }
   return answer;
